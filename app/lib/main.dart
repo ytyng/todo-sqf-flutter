@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'models.dart';
 
+final todoWidgetKey = GlobalKey<_TodoState>();
+
 void main() async {
   final bool isInitialized = await TodoDbModel().initializeDB();
   if (isInitialized == true) {
@@ -22,8 +24,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MyScaffold extends StatelessWidget {
-  final todoWidgetKey = GlobalKey<_TodoState>();
-
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
@@ -36,9 +36,7 @@ class MyScaffold extends StatelessWidget {
               await showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return EditDialog(
-                      todoWidgetKey: todoWidgetKey,
-                    );
+                    return EditDialog();
                   });
             },
             child: Icon(Icons.add),
@@ -77,7 +75,6 @@ class _TodoState extends State<TodoWidget> {
                           return EditDialog(
                             title: item.title,
                             todoId: item.id,
-                            todoWidgetKey: widget.key,
                           );
                         });
                   },
@@ -103,14 +100,12 @@ class _TodoState extends State<TodoWidget> {
 class EditDialog extends StatefulWidget {
   final int todoId;
   final String title;
-  final GlobalKey<_TodoState> todoWidgetKey;
   final List<Widget> children;
 
   const EditDialog({
     Key key,
     this.todoId,
     this.title,
-    this.todoWidgetKey,
     this.children,
   }) : super(key: key);
 
@@ -153,7 +148,7 @@ class _EditDialogState extends State<EditDialog> {
             onPressed: () {
               if (textEditingController.text.length > 0) {
                 Todo(title: textEditingController.text, active: true).save();
-                widget.todoWidgetKey.currentState.update();
+                todoWidgetKey.currentState.update();
               }
               Navigator.of(context).pop();
             })
@@ -170,7 +165,7 @@ class _EditDialogState extends State<EditDialog> {
                         title: textEditingController.text,
                         active: true)
                     .save();
-                widget.todoWidgetKey.currentState.update();
+                todoWidgetKey.currentState.update();
               }
               Navigator.of(context).pop();
             }),
@@ -180,7 +175,7 @@ class _EditDialogState extends State<EditDialog> {
             buttonColor: Colors.red,
             onPressed: () {
               Todo().select().id.equals(widget.todoId).delete();
-              widget.todoWidgetKey.currentState.update();
+              todoWidgetKey.currentState.update();
               Navigator.of(context).pop();
             })
       ];
